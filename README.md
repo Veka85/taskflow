@@ -66,6 +66,7 @@ App runs at: `http://localhost:3000`
 - User: `demo@taskflow.com` / `password`
 
 These are created by `npm run db:seed`.
+`npm run db:seed` also creates sample boards, lists, cards, labels, memberships, and comments.
 
 ## API Coverage
 
