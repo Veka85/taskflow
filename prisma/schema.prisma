@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int          @id @default(autoincrement())
+  name              String
+  email             String       @unique
+  email_verified_at DateTime?
+  password          String
+  role              String       @default("user")
+  avatar            String?
+  remember_token    String?
+  created_at        DateTime
+  updated_at        DateTime
+
+  ownedBoards Board[]      @relation("BoardOwner")
+  boardMembers BoardMember[]
+  cardMembers  CardMember[]
+  comments     Comment[]
+
+  @@map("users")
+}
+
+model Board {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  title       String
+  description String?
+  color       String   @default("#0079BF")
+  is_archived Boolean  @default(false)
+  created_at  DateTime
+  updated_at  DateTime
+
+  owner       User          @relation("BoardOwner", fields: [user_id], references: [id], onDelete: Cascade)
+  members     BoardMember[]
+  lists       BoardList[]
+  labels      Label[]
+
+  @@map("boards")
+}
+
+model BoardMember {
+  id         Int      @id @default(autoincrement())
+  board_id   Int
+  user_id    Int
+  role       String   @default("member")
+  created_at DateTime
+  updated_at DateTime
+
+  board Board @relation(fields: [board_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([board_id, user_id])
+  @@map("board_members")
+}
+
+model BoardList {
+  id          Int      @id @default(autoincrement())
+  board_id    Int
+  title       String
+  position    Int      @default(0)
+  is_archived Boolean  @default(false)
+  created_at  DateTime
+  updated_at  DateTime
+
+  board Board  @relation(fields: [board_id], references: [id], onDelete: Cascade)
+  cards Card[]
+
+  @@map("lists")
+}
+
+model Card {
+  id          Int      @id @default(autoincrement())
+  list_id     Int
+  title       String
+  description String?
+  position    Int      @default(0)
+  due_date    DateTime?
+  cover_color String?
+  is_archived Boolean  @default(false)
+  created_at  DateTime
+  updated_at  DateTime
+
+  list    BoardList     @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  labels  CardLabel[]
+  members CardMember[]
+  comments Comment[]
+
+  @@map("cards")
+}
+
+model Label {
+  id         Int      @id @default(autoincrement())
+  board_id   Int
+  name       String
+  color      String
+  created_at DateTime
+  updated_at DateTime
+
+  board Board       @relation(fields: [board_id], references: [id], onDelete: Cascade)
+  cards CardLabel[]
+
+  @@map("labels")
+}
+
+model CardLabel {
+  id         Int      @id @default(autoincrement())
+  card_id    Int
+  label_id   Int
+  created_at DateTime
+  updated_at DateTime
+
+  card  Card  @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [label_id], references: [id], onDelete: Cascade)
+
+  @@unique([card_id, label_id])
+  @@map("card_labels")
+}
+
+model CardMember {
+  id         Int      @id @default(autoincrement())
+  card_id    Int
+  user_id    Int
+  created_at DateTime
+  updated_at DateTime
+
+  card Card @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([card_id, user_id])
+  @@map("card_members")
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  card_id    Int
+  user_id    Int
+  body       String
+  created_at DateTime
+  updated_at DateTime
+
+  card Card @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}

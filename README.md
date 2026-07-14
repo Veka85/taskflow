@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TaskFlow (Next.js Rewrite)
 
-## Getting Started
+TaskFlow has been redesigned to run as a single Next.js full-stack app.
 
-First, run the development server:
+This implementation replaces the Laravel API with Next.js App Router API routes while preserving the original React Kanban experience and route structure.
+
+## Stack
+
+- Next.js 16 (App Router)
+- React 19
+- Tailwind CSS 4
+- Prisma 6 + SQLite
+- Axios + React Router + @dnd-kit
+- JWT auth (Bearer token)
+
+## What Changed
+
+- Laravel backend endpoints were rewritten as Next API routes under `src/app/api/**`.
+- Existing React UI was migrated into `src/spa/**` and mounted through a catch-all route `src/app/[[...slug]]/page.jsx`.
+- Database access is now via Prisma client (`src/lib/prisma.js`) using `prisma/dev.db`.
+- Auth no longer depends on Sanctum; JWT is handled in `src/lib/auth.js`.
+
+## Local Setup
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+3. Generate Prisma client
+
+```bash
+npm run prisma:generate
+```
+
+4. Start development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Demo Accounts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Admin: `admin@taskflow.com` / `password`
+- User: `demo@taskflow.com` / `password`
 
-## Learn More
+## API Coverage
 
-To learn more about Next.js, take a look at the following resources:
+Implemented routes cover auth, boards, lists, cards, comments, labels, admin stats/users, and search:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/app/api/auth/**`
+- `src/app/api/boards/**`
+- `src/app/api/lists/**`
+- `src/app/api/cards/**`
+- `src/app/api/comments/**`
+- `src/app/api/labels/**`
+- `src/app/api/admin/**`
+- `src/app/api/search/route.js`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The project currently has one non-blocking lint warning in `src/spa/context/AuthContext.jsx` (`react-hooks/exhaustive-deps`).
+- Production build succeeds (`npm run build`).
