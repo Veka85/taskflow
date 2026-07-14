@@ -9,7 +9,7 @@ This implementation replaces the Laravel API with Next.js App Router API routes 
 - Next.js 16 (App Router)
 - React 19
 - Tailwind CSS 4
-- Prisma 6 + SQLite
+- Prisma 6 + PostgreSQL
 - Axios + React Router + @dnd-kit
 - JWT auth (Bearer token)
 
@@ -17,7 +17,7 @@ This implementation replaces the Laravel API with Next.js App Router API routes 
 
 - Laravel backend endpoints were rewritten as Next API routes under `src/app/api/**`.
 - Existing React UI was migrated into `src/spa/**` and mounted through a catch-all route `src/app/[[...slug]]/page.jsx`.
-- Database access is now via Prisma client (`src/lib/prisma.js`) using `prisma/dev.db`.
+- Database access is now via Prisma client (`src/lib/prisma.js`) using PostgreSQL.
 - Auth no longer depends on Sanctum; JWT is handled in `src/lib/auth.js`.
 
 ## Local Setup
@@ -40,7 +40,19 @@ cp .env.example .env
 npm run prisma:generate
 ```
 
-4. Start development server
+4. Push Prisma schema to your PostgreSQL database
+
+```bash
+npm run db:push
+```
+
+5. Seed demo users
+
+```bash
+npm run db:seed
+```
+
+6. Start development server
 
 ```bash
 npm run dev
@@ -52,6 +64,8 @@ App runs at: `http://localhost:3000`
 
 - Admin: `admin@taskflow.com` / `password`
 - User: `demo@taskflow.com` / `password`
+
+These are created by `npm run db:seed`.
 
 ## API Coverage
 
@@ -70,3 +84,29 @@ Implemented routes cover auth, boards, lists, cards, comments, labels, admin sta
 
 - The project currently has one non-blocking lint warning in `src/spa/context/AuthContext.jsx` (`react-hooks/exhaustive-deps`).
 - Production build succeeds (`npm run build`).
+
+## Netlify Deployment
+
+Set these environment variables in Netlify:
+
+- `DATABASE_URL` (PostgreSQL connection string)
+- `JWT_SECRET` (long random secret)
+
+Build command:
+
+```bash
+npm run build
+```
+
+Publish directory:
+
+```bash
+.next
+```
+
+After first deploy, run schema + seed once against your production database:
+
+```bash
+npm run db:push
+npm run db:seed
+```
